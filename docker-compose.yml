@@ -1,8 +1,11 @@
 services:
   marzban:
-    image: gozargah/marzban:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: always
     env_file: .env
-    network_mode: host
+    ports:
+      - "8000:8000"
     volumes:
       - /var/lib/marzban:/var/lib/marzban
