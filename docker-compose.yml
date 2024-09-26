@@ -9,3 +9,37 @@ services:
       - "8000:8000"
     volumes:
       - /var/lib/marzban:/var/lib/marzban
+    depends_on:
+      - mysql
+    networks:
+      - marzban-network
+
+  mysql:
+    image: mysql:latest
+    restart: always
+    env_file: .env
+    environment:
+      MYSQL_DATABASE: marzban
+    volumes:
+      - /var/lib/marzban/mysql:/var/lib/mysql
+    networks:
+      - marzban-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    restart: always
+    env_file: .env
+    environment:
+      UPLOAD_LIMIT: 300M
+      PMA_HOST: mysql
+      APACHE_PORT: 8010
+    depends_on:
+      - mysql
+    networks:
+      - marzban-network
+    ports:
+      - "8010:8010"
+
+networks:
+  marzban-network:
+    driver: bridge
