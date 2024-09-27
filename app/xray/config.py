@@ -261,14 +261,44 @@ class XRayConfig(dict):
                     if isinstance(host, str):
                         settings['host'] = [host]
 
-                elif net == 'grpc':
+                elif net == 'grpc' or net == 'gun':
                     settings['header_type'] = ''
                     settings['path'] = net_settings.get('serviceName', '')
-                    settings['host'] = []
+                    host = net_settings.get('authority', '')
+                    settings['host'] = [host]
+                    settings['multiMode'] = net_settings.get('multiMode', False)
+
+                elif net == 'quic':
+                    settings['header_type'] = net_settings.get('header', {}).get('type', '')
+                    settings['path'] = net_settings.get('key', '')
+                    settings['host'] = [net_settings.get('security', '')]
+
+                elif net == 'httpupgrade':
+                    settings['path'] = net_settings.get('path', '')
+                    host = net_settings.get('host', '')
+                    settings['host'] = [host]
+
+                elif net == 'splithttp':
+                    settings['path'] = net_settings.get('path', '')
+                    host = net_settings.get('host', '')
+                    settings['host'] = [host]
+                    settings['scMaxEachPostBytes'] = net_settings.get('scMaxEachPostBytes',
+                                                                      net_settings.get('maxUploadSize', 1000000))
+                    settings['scMaxConcurrentPosts'] = net_settings.get('scMaxConcurrentPosts',
+                                                                        net_settings.get('maxConcurrentUploads', 100))
+                    settings['scMinPostsIntervalMs'] = net_settings.get('scMinPostsIntervalMs', 30)
+
+                elif net == 'kcp':
+                    header = net_settings.get('header', {})
+
+                    settings['header_type'] = header.get('type', '')
+                    settings['host'] = header.get('domain', '')
+                    settings['path'] = net_settings.get('seed', '')
 
                 else:
                     settings['path'] = net_settings.get('path', '')
-                    host = net_settings.get('host', {}) or net_settings.get('Host', {})
+                    host = net_settings.get(
+                        'host', {}) or net_settings.get('Host', {})
                     if host and isinstance(host, list):
                         settings['host'] = host[0]
                     elif host and isinstance(host, str):
